@@ -19,6 +19,7 @@ import { sectionify } from 'lib/route/path';
 import SiteSettingsComponent from 'my-sites/site-settings/main';
 import StartOver from './start-over';
 import ThemeSetup from './theme-setup';
+import ManageConnection from './manage-connection';
 import { setDocumentHeadTitle as setTitle } from 'state/document-head/actions';
 import titlecase from 'to-title-case';
 import { getSelectedSite, getSelectedSiteId, getSelectedSiteSlug } from 'state/ui/selectors';
@@ -172,6 +173,13 @@ const controller = {
 		renderPage(
 			context,
 			<ThemeSetup activeSiteDomain={ context.params.site_id } />
+		);
+	},
+
+	manageConnection( context ) {
+		renderPage(
+			context,
+			<ManageConnection />
 		);
 	},
 
