@@ -125,9 +125,6 @@ export function requestSimplePaymentsProductAdd( { dispatch }, action ) {
 	}, action ) );
 }
 
-export const addProduct = ( { dispatch }, { siteId }, next, newProduct ) =>
-	dispatch( receiveUpdateProduct( siteId, customPostToProduct( newProduct ) ) );
-
 /**
  * Issues an API request to edit a product
  * @param {Object} store Redux store
@@ -147,20 +144,25 @@ export function requestSimplePaymentsProductEdit( { dispatch }, action ) {
  * Issues an API request to delete a product
  * @param {Object} store Redux store
  * @param {Object} action Action object
- * @return {Promise} Promise
  */
 export function requestSimplePaymentsProductDelete( { dispatch }, action ) {
-	return wpcom
-		.site( action.siteId )
-		.deletePost( action.productId )
-		.then( ( deletedProduct ) => {
-			dispatch( receiveDeleteProduct( action.siteId, deletedProduct.ID ) );
-		} );
+	const { siteId, productId } = action;
+
+	dispatch( http( {
+		method: 'POST',
+		path: `/sites/${ siteId }/posts/${ productId }/delete`,
+	}, action ) );
 }
+
+export const addProduct = ( { dispatch }, { siteId }, next, newProduct ) =>
+	dispatch( receiveUpdateProduct( siteId, customPostToProduct( newProduct ) ) );
+
+export const deleteProduct = ( { dispatch }, { siteId }, next, deletedProduct ) =>
+	dispatch( receiveDeleteProduct( siteId, deletedProduct.ID ) );
 
 export default {
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]: [ requestSimplePaymentsProducts ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, addProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ dispatchRequest( requestSimplePaymentsProductEdit, addProduct ) ],
-	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ requestSimplePaymentsProductDelete ],
+	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ dispatchRequest( requestSimplePaymentsProductDelete, deleteProduct ) ],
 };
