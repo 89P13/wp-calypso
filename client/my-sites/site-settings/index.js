@@ -40,14 +40,12 @@ module.exports = function() {
 		);
 	}
 
-	if ( config.isEnabled( 'manage/export' ) ) {
-		page(
-			'/settings/export/:site_id',
-			controller.siteSelection,
-			controller.navigation,
-			settingsController.exportSite
-		);
-	}
+	page(
+		'/settings/export/:site_id',
+		controller.siteSelection,
+		controller.navigation,
+		settingsController.exportSite
+	);
 
 	page(
 		'/settings/delete-site/:site_id',
