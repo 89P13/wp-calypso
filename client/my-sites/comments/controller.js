@@ -25,7 +25,7 @@ export const getRedirectUrl = ( status, siteSlug ) => {
 		return `/comments/pending/${ siteSlug }`;
 	}
 	if ( ! statusValidity && ! siteSlug ) {
-		return '/comments';
+		return '/comments/pending';
 	}
 	if ( ! statusValidity && siteSlug ) {
 		return `/comments/pending/${ siteSlug }`;
