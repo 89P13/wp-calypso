@@ -132,16 +132,15 @@ export const addProduct = ( { dispatch }, { siteId }, next, newProduct ) =>
  * Issues an API request to edit a product
  * @param {Object} store Redux store
  * @param {Object} action Action object
- * @return {Promise} Promise
  */
 export function requestSimplePaymentsProductEdit( { dispatch }, action ) {
-	return wpcom
-		.site( action.siteId )
-		.post( action.productId )
-		.update( productToCustomPost( action.product ) )
-		.then( ( newProduct ) => {
-			dispatch( receiveUpdateProduct( action.siteId, customPostToProduct( newProduct ) ) );
-		} );
+	const { siteId, product, productId } = action;
+
+	dispatch( http( {
+		method: 'POST',
+		path: `/sites/${ siteId }/posts/${ productId }`,
+		body: productToCustomPost( product ),
+	}, action ) );
 }
 
 /**
@@ -162,6 +161,6 @@ export function requestSimplePaymentsProductDelete( { dispatch }, action ) {
 export default {
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]: [ requestSimplePaymentsProducts ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, addProduct ) ],
-	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ requestSimplePaymentsProductEdit ],
+	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ dispatchRequest( requestSimplePaymentsProductEdit, addProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ requestSimplePaymentsProductDelete ],
 };
