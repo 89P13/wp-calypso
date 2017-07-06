@@ -33,7 +33,7 @@ export const getRedirectUrl = ( status, siteSlug ) => {
 	if ( statusValidity && ! siteSlug ) {
 		return `/comments/${ status }`;
 	}
-	return false;
+	return null;
 };
 
 export const comments = function( context, next ) {
