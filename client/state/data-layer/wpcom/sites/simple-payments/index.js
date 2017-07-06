@@ -12,6 +12,7 @@ import {
 	receiveProductsList,
 	requestingProductList,
 	successProductListRequest,
+	receiveUpdateProduct,
 	failProductListRequest,
 	receiveDeleteProduct,
 } from 'state/simple-payments/product-list/actions';
@@ -124,15 +125,8 @@ export function requestSimplePaymentsProductAdd( { dispatch }, action ) {
 	}, action ) );
 }
 
-export const receiveUpdateProduct = ( { dispatch }, action, next, newProduct ) => {
-	const { siteId } = action;
-
-	dispatch( {
-		siteId,
-		product: customPostToProduct( newProduct ),
-		type: SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE_UPDATE,
-	} );
-};
+export const addProduct = ( { dispatch }, { siteId }, next, newProduct ) =>
+	dispatch( receiveUpdateProduct( siteId, customPostToProduct( newProduct ) ) );
 
 /**
  * Issues an API request to edit a product
@@ -167,7 +161,7 @@ export function requestSimplePaymentsProductDelete( { dispatch }, action ) {
 
 export default {
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]: [ requestSimplePaymentsProducts ],
-	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, receiveUpdateProduct ) ],
+	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, addProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ requestSimplePaymentsProductEdit ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ requestSimplePaymentsProductDelete ],
 };
