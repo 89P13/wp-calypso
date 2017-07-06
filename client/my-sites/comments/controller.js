@@ -13,9 +13,10 @@ import route from 'lib/route';
 import CommentsManagement from './main';
 import controller from 'my-sites/controller';
 
-export const isStatusValid = status => {
-	const validStatuses = [ 'pending', 'approved', 'spam', 'trash', 'all' ];
-	return includes( validStatuses, status );
+const VALID_STATUSES = [ 'pending', 'approved', 'spam', 'trash', 'all' ];
+
+export const isValidStatus = status => {
+	return includes( VALID_STATUSES, status );
 };
 
 export const getRedirect = ( status, siteSlug ) => {
