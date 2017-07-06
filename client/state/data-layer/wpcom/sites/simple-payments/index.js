@@ -6,19 +6,21 @@ import {
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD,
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT,
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE,
+	SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE_UPDATE,
 } from 'state/action-types';
 import {
 	receiveProductsList,
 	requestingProductList,
 	successProductListRequest,
 	failProductListRequest,
-	receiveUpdateProduct,
 	receiveDeleteProduct,
 } from 'state/simple-payments/product-list/actions';
 import { isRequestingSimplePaymentsProductList } from 'state/selectors';
 import { metaKeyToSchemaKeyMap, metadataSchema } from 'state/simple-payments/product-list/schema';
 import wpcom from 'lib/wp';
 import debug from 'debug';
+import { http } from 'state/data-layer/wpcom-http/actions';
+import { dispatchRequest } from 'state/data-layer/wpcom-http/utils';
 
 /**
  * Module variables
@@ -111,16 +113,26 @@ export function requestSimplePaymentsProducts( { dispatch, getState }, { siteId 
  * Issues an API request to add a new product
  * @param {Object} store Redux store
  * @param {Object} action Action object
- * @return {Promise} Promise
  */
 export function requestSimplePaymentsProductAdd( { dispatch }, action ) {
-	return wpcom
-		.site( action.siteId )
-		.addPost( productToCustomPost( action.product ) )
-		.then( ( newProduct ) => {
-			dispatch( receiveUpdateProduct( action.siteId, customPostToProduct( newProduct ) ) );
-		} );
+	const { siteId, product } = action;
+
+	dispatch( http( {
+		method: 'POST',
+		path: `/sites/${ siteId }/posts/new`,
+		body: productToCustomPost( product ),
+	}, action ) );
 }
+
+export const receiveUpdateProduct = ( { dispatch }, action, next, newProduct ) => {
+	const { siteId } = action;
+
+	dispatch( {
+		siteId,
+		product: customPostToProduct( newProduct ),
+		type: SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE_UPDATE,
+	} );
+};
 
 /**
  * Issues an API request to edit a product
@@ -155,7 +167,7 @@ export function requestSimplePaymentsProductDelete( { dispatch }, action ) {
 
 export default {
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]: [ requestSimplePaymentsProducts ],
-	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ requestSimplePaymentsProductAdd ],
+	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, receiveUpdateProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ requestSimplePaymentsProductEdit ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ requestSimplePaymentsProductDelete ],
 };
