@@ -19,8 +19,8 @@ export const isValidStatus = status => {
 	return includes( VALID_STATUSES, status );
 };
 
-export const getRedirect = ( status, siteSlug ) => {
-	const statusValidity = isStatusValid( status );
+export const getRedirectUrl = ( status, siteSlug ) => {
+	const statusValidity = isValidStatus( status );
 	if ( status === siteSlug ) {
 		return '/comments/pending/' + siteSlug;
 	}
@@ -39,7 +39,7 @@ export const getRedirect = ( status, siteSlug ) => {
 export const comments = function( context, next ) {
 	const { status } = context.params;
 	const siteSlug = route.getSiteFragment( context.path );
-	const redirect = getRedirect( status, siteSlug );
+	const redirect = getRedirectUrl( status, siteSlug );
 
 	if ( redirect ) {
 		return page.redirect( redirect );
@@ -61,7 +61,7 @@ export const comments = function( context, next ) {
 export const sites = function( context, next ) {
 	const { status } = context.params;
 	const siteSlug = route.getSiteFragment( context.path );
-	const redirect = getRedirect( status, siteSlug );
+	const redirect = getRedirectUrl( status, siteSlug );
 
 	if ( redirect && '/comments/' + status !== redirect ) {
 		return page.redirect( redirect );
