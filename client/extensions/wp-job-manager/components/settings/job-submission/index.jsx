@@ -76,7 +76,9 @@ const JobSubmission = ( { isDisabled, submissionDuration, translate } ) => {
 								<option value="shop_manager">{ translate( 'Shop manager' ) }</option>
 							</ReduxFormSelect>
 							<FormSettingExplanation>
-								{ translate( 'Any new accounts created during submission will have this role.' ) }
+								{ translate( 'Any new accounts created during submission will have this role. ' +
+									'If you haven\'t enabled account creation during submission, you\'ll manually ' +
+									'assign roles to each new account.' ) }
 							</FormSettingExplanation>
 						</FormFieldset>
 					</Card>
@@ -154,7 +156,8 @@ const JobSubmission = ( { isDisabled, submissionDuration, translate } ) => {
 					<Card>
 						<FormFieldset>
 							<FormSettingExplanation>
-								{ translate( 'Choose the contact method for listings.' ) }
+								{ translate( 'Choose the ways applicants can apply to job listings. Website URLs ' +
+									'will display as "Apply" links in job listings, and email addresses will display as-is.' ) }
 							</FormSettingExplanation>
 							<FormLabel>
 								<ReduxFormRadio
