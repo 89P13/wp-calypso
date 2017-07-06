@@ -22,16 +22,16 @@ export const isValidStatus = status => {
 export const getRedirectUrl = ( status, siteSlug ) => {
 	const statusValidity = isValidStatus( status );
 	if ( status === siteSlug ) {
-		return '/comments/pending/' + siteSlug;
+		return `/comments/pending/${ siteSlug }`;
 	}
 	if ( ! statusValidity && ! siteSlug ) {
 		return '/comments';
 	}
 	if ( ! statusValidity && siteSlug ) {
-		return '/comments/pending/' + siteSlug;
+		return `/comments/pending/${ siteSlug }`;
 	}
 	if ( statusValidity && ! siteSlug ) {
-		return '/comments/' + status;
+		return `/comments/${ status }`;
 	}
 	return false;
 };
