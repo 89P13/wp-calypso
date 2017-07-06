@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { translate } from 'i18n-calypso';
+
+/**
  * Internal dependencies
  */
 import {
@@ -6,27 +11,17 @@ import {
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD,
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT,
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE,
-	SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE_UPDATE,
 } from 'state/action-types';
 import {
 	receiveProductsList,
-	requestingProductList,
-	successProductListRequest,
 	receiveUpdateProduct,
-	failProductListRequest,
 	receiveDeleteProduct,
 } from 'state/simple-payments/product-list/actions';
-import { isRequestingSimplePaymentsProductList } from 'state/selectors';
 import { metaKeyToSchemaKeyMap, metadataSchema } from 'state/simple-payments/product-list/schema';
-import wpcom from 'lib/wp';
-import debug from 'debug';
 import { http } from 'state/data-layer/wpcom-http/actions';
 import { dispatchRequest } from 'state/data-layer/wpcom-http/utils';
-
-/**
- * Module variables
- */
-const log = debug( 'calypso:middleware-simple-payments' );
+import { getRawSite } from 'state/sites/selectors';
+import { errorNotice } from 'state/notices/actions';
 
 /**
  * Reduce function for product attributes stored in post metadata
@@ -83,31 +78,22 @@ function productToCustomPost( product ) {
 }
 
 /**
- * Issues an API request to fetch media for a site and query.
+ * Issues an API request to fetch products for a site.
  *
  * @param  {Object}  store  Redux store
  * @param  {Object}  action Action object
- * @return {Promise}        Promise
  */
-export function requestSimplePaymentsProducts( { dispatch, getState }, { siteId } ) {
-	if ( isRequestingSimplePaymentsProductList( getState(), siteId ) ) {
-		return;
-	}
+export function requestSimplePaymentsProducts( { dispatch }, action ) {
+	const { siteId } = action;
 
-	dispatch( requestingProductList( siteId ) );
-	log( 'Request product list for site %d.', siteId );
-
-	return wpcom
-		.site( siteId )
-		.postsList( {
+	dispatch( http( {
+		method: 'GET',
+		path: `/sites/${ siteId }/posts`,
+		query: {
 			type: 'jp_pay_product',
 			status: 'publish'
-		} )
-		.then( ( { found, posts } ) => {
-			dispatch( receiveProductsList( siteId, found, posts.map( customPostToProduct ) ) );
-			dispatch( successProductListRequest( siteId ) );
-		}	)
-		.catch( err => dispatch( failProductListRequest( siteId, err ) ) );
+		},
+	}, action ) );
 }
 
 /**
@@ -160,8 +146,21 @@ export const addProduct = ( { dispatch }, { siteId }, next, newProduct ) =>
 export const deleteProduct = ( { dispatch }, { siteId }, next, deletedProduct ) =>
 	dispatch( receiveDeleteProduct( siteId, deletedProduct.ID ) );
 
+export const listProducts = ( { dispatch }, { siteId }, next, { found: numOfProducts, posts: products } ) =>
+	dispatch( receiveProductsList( siteId, numOfProducts, products.map( customPostToProduct ) ) );
+
+const announceListingProductsFailure = ( { dispatch, getState }, { siteId } ) => {
+	const site = getRawSite( getState(), siteId );
+	const error = site && site.name
+		? translate( 'Failed to retrieve products for site “%(siteName)s.”', { args: { siteName: site.name } } )
+		: translate( 'Failed to retrieve products for your site.' );
+
+	dispatch( errorNotice( error ) );
+};
+
 export default {
-	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]: [ requestSimplePaymentsProducts ],
+	[ SIMPLE_PAYMENTS_PRODUCTS_LIST ]:
+		[ dispatchRequest( requestSimplePaymentsProducts, listProducts, announceListingProductsFailure ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_ADD ]: [ dispatchRequest( requestSimplePaymentsProductAdd, addProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_EDIT ]: [ dispatchRequest( requestSimplePaymentsProductEdit, addProduct ) ],
 	[ SIMPLE_PAYMENTS_PRODUCTS_LIST_DELETE ]: [ dispatchRequest( requestSimplePaymentsProductDelete, deleteProduct ) ],

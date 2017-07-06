@@ -10,7 +10,7 @@ import {
 	SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE_DELETE,
 } from 'state/action-types';
 
-export function receiveProductsList( siteId, found, posts ) {
+export function receiveProductsList( siteId, numOfProducts, posts ) {
 	return {
 		type: SIMPLE_PAYMENTS_PRODUCTS_LIST_RECEIVE,
 		siteId,
