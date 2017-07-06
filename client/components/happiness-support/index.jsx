@@ -2,7 +2,8 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import localize from 'i18n-calypso';
+import { connect } from 'react-redux';
+import { localize } from 'i18n-calypso';
 import React from 'react';
 import sample from 'lodash/sample';
 
@@ -11,7 +12,13 @@ import sample from 'lodash/sample';
  */
 import Button from 'components/button';
 import Gravatar from 'components/gravatar';
+import { getCurrentPlan } from 'state/sites/plans/selectors';
+import { getSelectedSiteId } from 'state/ui/selectors';
+import { isFreePlan } from 'lib/plans';
+import { isHappychatAvailable } from 'state/happychat/selectors';
+import { isJetpackSite } from 'state/sites/selectors';
 import support from 'lib/url/support';
+import HappyChatButton from 'components/happychat/button';
 
 const HappinessSupport = React.createClass( {
 	propTypes: {
@@ -41,6 +48,14 @@ const HappinessSupport = React.createClass( {
 			<Button href={ url } target={ target }>
 				{ this.props.translate( 'Ask a question' ) }
 			</Button>
+		);
+	},
+
+	renderLiveChatButton() {
+		return (
+			<HappyChatButton borderless={ false }>
+				{ this.props.translate( 'Ask a question' ) }
+			</HappyChatButton>
 		);
 	},
 
@@ -74,6 +89,7 @@ const HappinessSupport = React.createClass( {
 			'happiness-support': true,
 			'is-placeholder': this.props.isPlaceholder
 		};
+		const { isJetpackPaidPlan, liveChatAvailable } = this.props;
 
 		return (
 			<div className={ classNames( classes ) }>
@@ -95,7 +111,7 @@ const HappinessSupport = React.createClass( {
 				</p>
 
 				<div className="happiness-support__buttons">
-					{ this.renderContactButton() }
+					{ isJetpackPaidPlan && liveChatAvailable ? this.renderLiveChatButton() : this.renderContactButton() }
 					{ this.renderSupportButton() }
 				</div>
 			</div>
@@ -103,4 +119,15 @@ const HappinessSupport = React.createClass( {
 	}
 } );
 
-export default localize( HappinessSupport );
+export default connect(
+	state => {
+		const siteId = getSelectedSiteId( state );
+		const plan = getCurrentPlan( state, siteId );
+		const isJetpackFreePlan = isJetpackSite( state, siteId ) && plan && plan.productSlug && isFreePlan( plan.productSlug );
+
+		return {
+			isJetpackPaidPlan: ! isJetpackFreePlan,
+			liveChatAvailable: isHappychatAvailable( state ),
+		};
+	}
+)( localize( HappinessSupport ) );
