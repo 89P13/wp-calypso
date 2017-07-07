@@ -85,12 +85,16 @@ const HappinessSupport = React.createClass( {
 		);
 	},
 
+	isEligibleForLiveChat() {
+		const { isJetpackPaidPlan, liveChatAvailable } = this.props;
+		return isJetpackPaidPlan && liveChatAvailable;
+	},
+
 	render() {
 		const classes = {
 			'happiness-support': true,
 			'is-placeholder': this.props.isPlaceholder
 		};
-		const { isJetpackPaidPlan, liveChatAvailable } = this.props;
 
 		return (
 			<div className={ classNames( classes ) }>
@@ -113,7 +117,7 @@ const HappinessSupport = React.createClass( {
 
 				<div className="happiness-support__buttons">
 					<HappyChatConnection />
-					{ isJetpackPaidPlan && liveChatAvailable ? this.renderLiveChatButton() : this.renderContactButton() }
+					{ this.isEligibleForLiveChat() ? this.renderLiveChatButton() : this.renderContactButton() }
 					{ this.renderSupportButton() }
 				</div>
 			</div>
