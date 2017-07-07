@@ -80,7 +80,7 @@ class Shipping extends Component {
 		const { siteId, zone, locations, translate, actions, areLocationsValid, areMethodsValid } = this.props;
 		let hasErrors = false;
 		if ( ! areLocationsValid ) {
-			actions.errorNotice( translate( 'Add locations to this zone' ), { duration: 4000 } );
+			actions.errorNotice( translate( 'Add at least one location to this zone' ), { duration: 4000 } );
 			hasErrors = true;
 		}
 
