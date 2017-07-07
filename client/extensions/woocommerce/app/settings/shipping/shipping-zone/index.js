@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { localize } from 'i18n-calypso';
+import { isEmpty } from 'lodash';
 import page from 'page';
 
 /**
@@ -24,7 +25,11 @@ import {
 } from 'woocommerce/state/ui/shipping/zones/actions';
 import { changeShippingZoneName } from 'woocommerce/state/ui/shipping/zones/actions';
 import { getCurrentlyEditingShippingZone } from 'woocommerce/state/ui/shipping/zones/selectors';
-import { getCurrentlyEditingShippingZoneLocationsList } from 'woocommerce/state/ui/shipping/zones/locations/selectors';
+import {
+	getCurrentlyEditingShippingZoneLocationsList,
+	areCurrentlyEditingShippingZoneLocationsValid,
+} from 'woocommerce/state/ui/shipping/zones/locations/selectors';
+import { getCurrentlyEditingShippingZoneMethods } from 'woocommerce/state/ui/shipping/zones/methods/selectors';
 import { getSelectedSite, getSelectedSiteId } from 'state/ui/selectors';
 import { successNotice, errorNotice } from 'state/notices/actions';
 import { getLink } from 'woocommerce/lib/nav-utils';
@@ -72,7 +77,22 @@ class Shipping extends Component {
 	}
 
 	onSave() {
-		const { siteId, zone, locations, translate, actions } = this.props;
+		const { siteId, zone, locations, translate, actions, areLocationsValid, areMethodsValid } = this.props;
+		let hasErrors = false;
+		if ( ! areLocationsValid ) {
+			actions.errorNotice( translate( 'Add locations to this zone' ), { duration: 4000 } );
+			hasErrors = true;
+		}
+
+		if ( ! areMethodsValid ) {
+			actions.errorNotice( translate( 'Add shipping methods to this zone' ), { duration: 4000 } );
+			hasErrors = true;
+		}
+
+		if ( hasErrors ) {
+			return;
+		}
+
 		if ( ! zone.name ) {
 			actions.changeShippingZoneName( siteId, getZoneName( zone, locations, translate ) );
 		}
@@ -105,8 +125,7 @@ class Shipping extends Component {
 	}
 
 	render() {
-		const { siteId, className, loaded, zone, locations, params } = this.props;
-		const isRestOfTheWorld = 0 === Number( params.zone );
+		const { siteId, className, loaded, zone, locations, isRestOfTheWorld } = this.props;
 
 		return (
 			<Main className={ classNames( 'shipping', className ) }>
@@ -141,13 +160,19 @@ Shipping.propTypes = {
 export default connect(
 	( state ) => {
 		const loaded = areShippingZonesFullyLoaded( state );
+		const zone = loaded && getCurrentlyEditingShippingZone( state );
+		const isRestOfTheWorld = zone && 0 === Number( zone.id );
+		const methods = loaded && getCurrentlyEditingShippingZoneMethods( state );
 
 		return {
 			siteId: getSelectedSiteId( state ),
 			site: getSelectedSite( state ),
 			loaded,
-			zone: loaded && getCurrentlyEditingShippingZone( state ),
+			zone,
+			isRestOfTheWorld,
 			locations: loaded && getCurrentlyEditingShippingZoneLocationsList( state, 20 ),
+			areMethodsValid: ! isEmpty( methods ),
+			areLocationsValid: isRestOfTheWorld || areCurrentlyEditingShippingZoneLocationsValid( state ),
 		};
 	},
 	( dispatch ) => ( {
@@ -157,6 +182,7 @@ export default connect(
 				openShippingZoneForEdit,
 				changeShippingZoneName,
 				createShippingZoneActionList,
+				errorNotice,
 			}, dispatch
 		)
 	} ) )( localize( Shipping ) );
