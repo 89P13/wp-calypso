@@ -19,6 +19,7 @@ import { isHappychatAvailable } from 'state/happychat/selectors';
 import { isJetpackSite } from 'state/sites/selectors';
 import support from 'lib/url/support';
 import HappyChatButton from 'components/happychat/button';
+import HappyChatConnection from 'components/happychat/connection';
 
 const HappinessSupport = React.createClass( {
 	propTypes: {
@@ -111,6 +112,7 @@ const HappinessSupport = React.createClass( {
 				</p>
 
 				<div className="happiness-support__buttons">
+					<HappyChatConnection />
 					{ isJetpackPaidPlan && liveChatAvailable ? this.renderLiveChatButton() : this.renderContactButton() }
 					{ this.renderSupportButton() }
 				</div>
