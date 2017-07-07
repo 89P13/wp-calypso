@@ -127,7 +127,7 @@ class StoreStatsWidgetList extends Component {
 				return {
 					title: widget.title,
 					value: ( widget.type === 'currency' )
-						? formatCurrency( timeSeries[ selectedIndex ] )
+						? formatCurrency( timeSeries[ selectedIndex ], sincePeriod.currency )
 						:	Math.round( timeSeries[ selectedIndex ] * 100 ) / 100,
 					sparkline: <Sparkline
 						aspectRatio={ 3 }

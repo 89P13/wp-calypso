@@ -87,7 +87,6 @@ class StoreStatsChart extends Component {
 		const isLoading = ! orderData.length;
 		const chartData = orderData.map( item => this.buildChartData( item, selectedTab ) );
 		const selectedIndex = this.getSelectedIndex( orderData );
-		const currencyCode = ( ! isLoading ) ? orderData[ selectedIndex ].currency : 'USD';
 		return (
 			<Card className="store-stats-chart stats-module">
 				{ siteId && <QuerySiteStats
@@ -115,7 +114,7 @@ class StoreStatsChart extends Component {
 								>
 									<span className="store-stats-chart__value value">
 										{ ( tab.type === 'currency' )
-											? formatCurrency( itemChartData.value, currencyCode )
+											? formatCurrency( itemChartData.value, orderData[ selectedIndex ].currency )
 											:	Math.round( itemChartData.value * 100 ) / 100 }
 									</span>
 									<Delta
